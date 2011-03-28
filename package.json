@@ -1,0 +1,17 @@
+{
+	"name": "hermes-raw-client",
+	"version": "0.8.0",
+	"description": "Stateless Hermes client",
+	"keywords": ["hermes", "wink", "comet", "tcp", "messaging"],
+	"homepage": "https://github.com/hydna/hermes-raw-client",
+	"author": "Hydna AB <info@hydna.com> (http://www.hydna.com/)",
+  "main": ["./hermes-raw-client"],
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/hydna/hermes-raw-client.git"
+	},
+	"os": ["macos", "linux"],
+	"engines": {
+		"node": ">=0.4.0"
+	}
+}
