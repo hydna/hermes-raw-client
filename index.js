@@ -193,12 +193,12 @@ Connection.prototype._writePacket = function(ch, flag, data) {
   packet[7] = flag;
 
   try {
+    
     if (data.length) {
-      this.write(packet);
-      return this.write(data);
-    } else {
-      return this.write(packet);
+      data.copy(packet, 8, 0);
     }
+
+    return this.write(packet);
   } catch (writeException) {
     this.destroy(writeException);
     return false;
@@ -273,7 +273,7 @@ function packetParser(data, start, end) {
         break;
 
       case DATA:
-        this.emit("data", ch, flag, payload);
+        this.emit("message", ch, flag, payload);
         break;
 
       case SIGNAL:
@@ -300,6 +300,14 @@ function packetParser(data, start, end) {
     this._readpos = readpos;
     this._readend = bufferlength;
   }
+}
+
+function combindBuffers(buffera, starta, enda, bufferb, startb, endb) {
+  var length = (enda - starta) + (endb - startb);
+  var newbuffer = new Buffer(length);
+  buffera.copy(newbuffer, 0, starta, enda);
+  bufferb.copy(newbuffer, (enda - starta), startb, endb);
+  return newbuffer;
 }
 
 function getBinMode(modeExpr) {
