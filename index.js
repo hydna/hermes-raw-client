@@ -52,7 +52,7 @@ var MODE_RE = /^(r|read){0,1}(w|write){0,1}(?:\+){0,1}(e|emit){0,1}$/i;
 
 exports.createConnection = function(port, host, options, callback) {
   var connection;
-  
+
   if (typeof options == "function") {
     callback = hostname;
     connection = new Connection({});
@@ -65,23 +65,23 @@ exports.createConnection = function(port, host, options, callback) {
   if (callback) {
     connection.once("handshake", callback);
   }
-  
+
   return connection;
 };
 
 
 function Connection(options) {
   Stream.call(this, options);
-  
+
   this._openCallbacks = {};
 
   this._readbuffer = null;
   this._readpos = 0;
   this._readend = 0;
-  
+
   this._throwErrors = "throwErrors" in options ? options.throwErrors : true;
   this._hostname = "hostname" in options ? options.hostname : null;
-  
+
   this.setNoDelay();
   this.setKeepAlive(true);
 };
@@ -95,16 +95,16 @@ Connection.prototype.connect = function(port, host) {
   var hostname;
 
   Stream.prototype.connect.call(this, port, host);
-  
+
   hostname = this._hostname || (host && host.toString()) || "localhost";
-  
+
   packet = new Buffer(HANDSHAKE_HEADER.length + hostname.length + 1);
 
   packet.write(HANDSHAKE_HEADER, "ascii");
   packet[HANDSHAKE_CODE_OFF] = hostname.length;
   packet.write(host, HANDSHAKE_CODE_OFF + 1, "ascii");
   this.write(packet);
-  
+
   this.ondata = function(data, start, end) {
 
     datacache += data.toString("binary", start, end);
@@ -122,19 +122,19 @@ Connection.prototype.connect = function(port, host) {
         this.emit("handshake");
       }
     }
-  };  
+  };
 };
 
 Connection.prototype.writeOpen = function(ch, mode, data, callback) {
-  
+
   if (!data) {
     data = new Buffer("");
   }
-  
+
   if (!Buffer.isBuffer(data)) {
     data = new Buffer(data, "utf8");
   }
-  
+
   if (callback) {
     if (this._openCallbacks[ch]) {
       this._openCallbacks[ch].push(callback);
@@ -142,13 +142,13 @@ Connection.prototype.writeOpen = function(ch, mode, data, callback) {
       this._openCallbacks[ch] = [callback];
     }
   }
-  
+
   mode = getBinMode(mode);
-  
+
   if (typeof mode !== "number") {
     throw new Error("Invalid mode");
   }
-  
+
   return this._writePacket(ch, OPEN << 4 | mode, data);
 };
 
@@ -157,11 +157,11 @@ Connection.prototype.writeData = function(ch, priority, data, callback) {
   if (!data) {
     data = new Buffer("");
   }
-  
+
   if (!Buffer.isBuffer(data)) {
     data = new Buffer(data, "utf8");
   }
-  
+
   return this._writePacket(ch, DATA << 4 | priority, data);
 };
 
@@ -170,11 +170,11 @@ Connection.prototype.writeSignal = function(ch, type, data, callback) {
   if (!data) {
     data = new Buffer("");
   }
-  
+
   if (!Buffer.isBuffer(data)) {
     data = new Buffer(data, "utf8");
   }
-  
+
   return this._writePacket(ch, SIGNAL << 4 | type, data);
 };
 
@@ -182,7 +182,7 @@ Connection.prototype.writeSignal = function(ch, type, data, callback) {
 Connection.prototype._writePacket = function(ch, flag, data) {
   var length = 8 + data.length;
   var packet = new Buffer(length);
-  
+
   packet[0] = length >>> 8;
   packet[1] = length % 256;
   packet[2] = 0;
@@ -193,7 +193,7 @@ Connection.prototype._writePacket = function(ch, flag, data) {
   packet[7] = flag;
 
   try {
-    
+
     if (data.length) {
       data.copy(packet, 8, 0);
     }
@@ -204,7 +204,7 @@ Connection.prototype._writePacket = function(ch, flag, data) {
     return false;
     return;
   }
-  
+
   return true;
 };
 
@@ -221,7 +221,7 @@ function packetParser(data, start, end) {
   var bufferlength;
   var packetlength;
   var exception;
-  
+
   if (readbuffer) {
     readbuffer = combindBuffers(readbuffer, readpos, readend, data, start, end);
     bufferlength = readbuffer.length;
@@ -231,7 +231,7 @@ function packetParser(data, start, end) {
     readpos = start;
     bufferlength = end;
   }
-  
+
   while (readpos < bufferlength) {
 
     if (readpos + 0x02 > bufferlength) {
@@ -239,14 +239,14 @@ function packetParser(data, start, end) {
     }
 
     packetlength = (readbuffer[readpos] * 256) + readbuffer[readpos + 1];
-    
+
     if (readpos + packetlength > bufferlength) {
       break;
     }
-    
+
     ch = (readbuffer[readpos + 0x03] * 256 * 256 * 256) +
          (readbuffer[readpos + 0x04] * 256 * 256) +
-         (readbuffer[readpos + 0x05] * 256)  + 
+         (readbuffer[readpos + 0x05] * 256) +
          (readbuffer[readpos + 0x06]);
 
     flag = (readbuffer[readpos + 0x07] & 0xf);
@@ -284,7 +284,7 @@ function packetParser(data, start, end) {
           this.emit("signal", ch, flag, payload);
         }
         break;
-        
+
       default:
         this.destroy(new Error("Server sent bad operator " + (readbuffer[readpos + 0x07] >> 4)));
         return;
@@ -292,7 +292,7 @@ function packetParser(data, start, end) {
 
     readpos += packetlength;
   }
-  
+
   if (bufferlength - readpos == 0) {
     this._readbuffer = null;
   } else {
@@ -313,7 +313,7 @@ function combindBuffers(buffera, starta, enda, bufferb, startb, endb) {
 function getBinMode(modeExpr) {
   var result = 0;
   var match;
-  
+
   if (!modeExpr) {
     return 0;
   }
@@ -325,6 +325,6 @@ function getBinMode(modeExpr) {
   match[1] && (result |= READ);
   match[2] && (result |= WRITE);
   match[3] && (result |= EMIT);
-  
+
   return result;
 }
