@@ -162,7 +162,7 @@ Connection.prototype.writeData = function(ch, priority, data, callback) {
     data = new Buffer(data, "utf8");
   }
 
-  return this._writePacket(ch, DATA << 4 | priority, data);
+  return this._writePacket(ch, DATA << 4 | priority, data, callback);
 };
 
 Connection.prototype.writeSignal = function(ch, type, data, callback) {
@@ -175,11 +175,11 @@ Connection.prototype.writeSignal = function(ch, type, data, callback) {
     data = new Buffer(data, "utf8");
   }
 
-  return this._writePacket(ch, SIGNAL << 4 | type, data);
+  return this._writePacket(ch, SIGNAL << 4 | type, data, callback);
 };
 
 
-Connection.prototype._writePacket = function(ch, flag, data) {
+Connection.prototype._writePacket = function(ch, flag, data, callback) {
   var length = 8 + data.length;
   var packet = new Buffer(length);
 
@@ -198,7 +198,7 @@ Connection.prototype._writePacket = function(ch, flag, data) {
       data.copy(packet, 8, 0);
     }
 
-    return this.write(packet);
+    return this.write(packet, callback);
   } catch (writeException) {
     this.destroy(writeException);
     return false;
