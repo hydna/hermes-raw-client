@@ -265,7 +265,7 @@ function packetParser(data, start, end) {
         } else {
           if (flag > 2 && this._throwErrors) {
             var msg = "Open Error #" + flag + " " + payload.toString("utf8");
-            this.emit("error", new Error(msg));
+            this.emit("error", new Error(msg), flag, msg);
           } else {
             this.emit("open", ch, flag, payload);
           }
@@ -279,7 +279,7 @@ function packetParser(data, start, end) {
       case SIGNAL:
         if (flag > 1 && this._throwErrors) {
           var msg = "Signal Error #" + flag + " " + payload.toString("utf8");
-          this.emit("error", new Error(msg));
+          this.emit("error", new Error(msg), flag, msg);
         } else {
           this.emit("signal", ch, flag, payload);
         }
