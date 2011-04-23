@@ -152,7 +152,7 @@ Connection.prototype.writeOpen = function(ch, mode, data, callback) {
   return this._writePacket(ch, OPEN << 4 | mode, data);
 };
 
-Connection.prototype.writeData = function(ch, priority, data, callback) {
+Connection.prototype.writeData = function(ch, priority, data) {
 
   if (!data) {
     data = new Buffer("");
@@ -165,7 +165,7 @@ Connection.prototype.writeData = function(ch, priority, data, callback) {
   return this._writePacket(ch, DATA << 4 | priority, data);
 };
 
-Connection.prototype.writeSignal = function(ch, type, data, callback) {
+Connection.prototype.writeSignal = function(ch, type, data) {
 
   if (!data) {
     data = new Buffer("");
