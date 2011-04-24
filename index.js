@@ -152,7 +152,7 @@ Connection.prototype.writeOpen = function(ch, mode, data, callback) {
   return this._writePacket(ch, OPEN << 4 | mode, data);
 };
 
-Connection.prototype.writeData = function(ch, priority, data, callback) {
+Connection.prototype.writeData = function(ch, priority, data) {
 
   if (!data) {
     data = new Buffer("");
@@ -165,7 +165,7 @@ Connection.prototype.writeData = function(ch, priority, data, callback) {
   return this._writePacket(ch, DATA << 4 | priority, data, callback);
 };
 
-Connection.prototype.writeSignal = function(ch, type, data, callback) {
+Connection.prototype.writeSignal = function(ch, type, data) {
 
   if (!data) {
     data = new Buffer("");
@@ -264,8 +264,9 @@ function packetParser(data, start, end) {
           }
         } else {
           if (flag > 2 && this._throwErrors) {
-            var msg = "Open Error #" + flag + " " + payload.toString("utf8");
-            this.emit("error", new Error(msg));
+            var msg = payload.toString("utf8");
+            var err = new Error("Signal Error #" + flag + " " + msg);
+            this.emit("error", new Error(msg), flag, msg);
           } else {
             this.emit("open", ch, flag, payload);
           }
@@ -278,8 +279,9 @@ function packetParser(data, start, end) {
 
       case SIGNAL:
         if (flag > 1 && this._throwErrors) {
-          var msg = "Signal Error #" + flag + " " + payload.toString("utf8");
-          this.emit("error", new Error(msg));
+          var msg = payload.toString("utf8");
+          var err = new Error("Signal Error #" + flag + " " + msg);
+          this.emit("error", new Error(msg), flag, msg);
         } else {
           this.emit("signal", ch, flag, payload);
         }
