@@ -1,6 +1,6 @@
 {
 	"name": "hermes-raw-client",
-	"version": "0.8.3",
+	"version": "0.8.4",
 	"description": "Stateless Hermes client",
 	"keywords": ["hermes", "wink", "comet", "tcp", "messaging"],
 	"homepage": "https://github.com/hydna/hermes-raw-client",
